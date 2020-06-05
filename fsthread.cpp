@@ -27,7 +27,7 @@ void fsThread::run()
 
     dokan_options.Options |= DOKAN_OPTION_NETWORK;
 
-    dokan_options.ThreadCount = 0;
+    dokan_options.ThreadCount = 1;
     dokan_options.Timeout = 30;
     dokan_options.GlobalContext = 1234;
 

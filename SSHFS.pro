@@ -17,13 +17,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH += ./include
 
-SOURCES += \   
+SOURCES += \
+    filesystem.cpp\
     fsthread.cpp \
     main.cpp \
     mainwindow.cpp \
     fsOperations.cpp
 
-HEADERS += \   
+HEADERS += \
+    filesystem.h\
     fsthread.h \
     mainwindow.h \
     fsOperations.h
