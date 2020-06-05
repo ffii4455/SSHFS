@@ -17,14 +17,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH += ./include
 
-SOURCES += \
-    fsOperations.cpp \
+SOURCES += \   
+    fsthread.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    fsOperations.cpp
 
-HEADERS += \
-    fsOperations.h \
-    mainwindow.h
+HEADERS += \   
+    fsthread.h \
+    mainwindow.h \
+    fsOperations.h
 
 FORMS += \
     mainwindow.ui

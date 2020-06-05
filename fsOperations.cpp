@@ -9,18 +9,22 @@ memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
 {
     qDebug() << "CreateFile" << QString::fromStdWString(filename) << createdisposition;
 
-    if (QString::fromStdWString(filename) == "\\456")
-    {
-        qDebug() << "DIR";
-        if (createoptions & FILE_NON_DIRECTORY_FILE)
-        {
-            return STATUS_FILE_IS_A_DIRECTORY;
-        }
+    ACCESS_MASK generic_desiredaccess;
+    DWORD creation_disposition;
+    DWORD file_attributes_and_flags;
 
-        dokanfileinfo->IsDirectory = true;
+    DokanMapKernelToUserCreateFileFlags(
+                desiredaccess, fileattributes, createoptions, createdisposition,
+                &generic_desiredaccess, &file_attributes_and_flags,
+                &creation_disposition);
 
+    auto filename_str = std::wstring(filename);
 
+    if (filename_str == L"\\System Volume Information" ||
+            filename_str == L"\\$RECYCLE.BIN") {
+        return STATUS_NO_SUCH_FILE;
     }
+
 
     return STATUS_SUCCESS;
 }
