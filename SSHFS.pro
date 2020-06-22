@@ -33,6 +33,6 @@ HEADERS += \
 FORMS += \
     mainwindow.ui
 
-LIBS += -L$$PWD/lib/ -ldokan1
+LIBS += -L$$PWD/lib/ -ldokan1 -llibssh2
 
 INCLUDEPATH += $$PWD/include
