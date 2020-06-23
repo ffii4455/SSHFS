@@ -1,9 +1,9 @@
 ﻿#include "fsOperations.h"
 #include <QDebug>
-#include "filesystem.h"
 
 
-fileSystem fs;
+
+fileSystem fsys;
 
 static NTSTATUS DOKAN_CALLBACK
 memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
@@ -20,10 +20,10 @@ memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
                 &generic_desiredaccess, &file_attributes_and_flags,
                 &creation_disposition);
 
-    qDebug() << "CreateFile" << QString::fromStdWString(filename) << createoptions << creation_disposition;
+    qDebug() << "CreateFile" << QString::fromStdWString(filename);
 
     auto filename_str = std::wstring(filename);
-    auto f = fs.find(QString::fromStdWString(filename_str));
+    auto f = fsys.find(QString::fromStdWString(filename_str));
 
     if (filename_str == L"\\System Volume Information" ||
             filename_str == L"\\$RECYCLE.BIN") {
@@ -45,7 +45,7 @@ memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
             if (f)
                 return STATUS_OBJECT_NAME_COLLISION;
 
-           fs.createFile(QString::fromStdWString(filename), true, FILE_ATTRIBUTE_DIRECTORY);
+           fsys.createFile(QString::fromStdWString(filename), true, FILE_ATTRIBUTE_DIRECTORY);
            return STATUS_SUCCESS;
         }
 
@@ -59,13 +59,13 @@ memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
     {
         case CREATE_ALWAYS:
         {
-            fs.createFile(QString::fromStdWString(filename), false, file_attributes_and_flags);
+            fsys.createFile(QString::fromStdWString(filename), false, file_attributes_and_flags);
             break;
         }
         case CREATE_NEW:
         {
             if (f) return STATUS_OBJECT_NAME_COLLISION;
-            fs.createFile(QString::fromStdWString(filename), false, file_attributes_and_flags);
+            fsys.createFile(QString::fromStdWString(filename), false, file_attributes_and_flags);
             break;
         }
 
@@ -83,7 +83,7 @@ static NTSTATUS DOKAN_CALLBACK memfs_findfiles(LPCWSTR filename,
     WIN32_FIND_DATAW findData;
     ZeroMemory(&findData, sizeof(WIN32_FIND_DATAW));
 
-    for (auto file : fs.listFolder(QString::fromStdWString(filename)))
+    for (auto file : fsys.listFolder(QString::fromStdWString(filename)))
     {
         auto name = file->fileName.toStdWString();
         std::copy(name.begin(), name.end(), std::begin(findData.cFileName));

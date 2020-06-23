@@ -10,12 +10,13 @@ fileSystem::fileSystem() : root(new fileNode)
 void fileSystem::createFile(QString fileName, bool isDir, quint32 fileAttr)
 {
     fileNodePtr node(new fileNode);
-    node->setFileName(fileName);
+
     node->isDirectory = isDir;
     node->file_attr = fileAttr;
     fileIndexTable[fileName] = node;
     int pos = fileName.lastIndexOf("\\");
     QString parentPath = fileName.left(pos + 1);
+    node->setFileName(fileName.remove("\\"));
 
     fileNodePtr &parentNode = fileIndexTable[parentPath];
     parentNode->children.append(node);

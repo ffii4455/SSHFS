@@ -16,8 +16,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startConnect_clicked()
 {
-//    fs.reset(new fsThread());
-//    fs->start();
+    fs.reset(new fsThread());
+    fs->start();
 
     ss.reset(new sshThread());
     ss->setSshPara(ui->hostAddr->text(),

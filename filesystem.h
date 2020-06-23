@@ -16,9 +16,8 @@ struct filetimes
 };
 
 struct fileNode
-{
-    QMutex locker;
-    QString fileName;
+{    
+    QString fileName = "";
     bool isDirectory = false;
     quint32 file_attr = 0;
     quint64 size = 0;

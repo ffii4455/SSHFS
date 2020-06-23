@@ -1,4 +1,6 @@
 ﻿#include "sshthread.h"
+#include <QDebug>
+#include "fsOperations.h"
 
 sshThread::sshThread(QObject *parent) : QThread(parent)
 {
@@ -135,8 +137,19 @@ void sshThread::run()
             /* rc is the length of the file name in the mem
                    buffer */
 
+            qDebug() << QString::fromLocal8Bit(mem) << attrs.permissions << attrs.filesize << attrs.atime << attrs.mtime;
+            if ((attrs.permissions >> 12) == 0x4)
+            {
+                fsys.createFile(QString("%1%2").arg("\\").arg(mem), true, FILE_ATTRIBUTE_DIRECTORY);
+            }
+            else
+            {
+                fsys.createFile(QString("%1%2").arg("\\").arg(mem), false, 0);
+            }
+
+
             if(longentry[0] != '\0') {
-                printf("%s\n", longentry);
+               // printf("##%s##\n", longentry);
             }
             else {
                 if(attrs.flags & LIBSSH2_SFTP_ATTR_PERMISSIONS) {
