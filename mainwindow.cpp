@@ -14,9 +14,16 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_startConnect_clicked()
 {
-    fs.reset(new fsThread(this));
-    fs->start();
+//    fs.reset(new fsThread());
+//    fs->start();
+
+    ss.reset(new sshThread());
+    ss->setSshPara(ui->hostAddr->text(),
+                   ui->port->value(),
+                   ui->username->text(),
+                   ui->password->text(),
+                   ui->rootPath->text());
+    ss->start();
 }

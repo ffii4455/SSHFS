@@ -22,17 +22,19 @@ SOURCES += \
     fsthread.cpp \
     main.cpp \
     mainwindow.cpp \
-    fsOperations.cpp
+    fsOperations.cpp \
+    sshthread.cpp
 
 HEADERS += \
     filesystem.h\
     fsthread.h \
     mainwindow.h \
-    fsOperations.h
+    fsOperations.h \
+    sshthread.h
 
 FORMS += \
     mainwindow.ui
 
-LIBS += -L$$PWD/lib/ -ldokan1 -llibssh2
+LIBS += -L$$PWD/lib/ -ldokan1 -llibssh2  -lwsock32
 
 INCLUDEPATH += $$PWD/include

@@ -1,6 +1,7 @@
 ﻿#ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
+#include <Winsock2.h>
 #include <QString>
 #include <QVector>
 #include <QHash>
