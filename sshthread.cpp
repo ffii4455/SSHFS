@@ -21,7 +21,6 @@ void sshThread::run()
     const char *fingerprint;
     char *userauthlist;
     LIBSSH2_SESSION *session;
-    const char *sftppath = rootPath.toLocal8Bit().constData();
     LIBSSH2_SFTP *sftp_session;
     LIBSSH2_SFTP_HANDLE *sftp_handle;
 
@@ -45,7 +44,7 @@ void sshThread::run()
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
     sin.sin_family = AF_INET;
-    sin.sin_port = htons(10022);
+    sin.sin_port = htons(port);
     sin.sin_addr.s_addr = hostaddr;
     if(::connect(sock, (struct sockaddr*)(&sin),
                  sizeof(struct sockaddr_in)) != 0) {
@@ -117,7 +116,7 @@ void sshThread::run()
 
     fprintf(stderr, "libssh2_sftp_opendir()!\n");
     /* Request a dir listing via SFTP */
-    sftp_handle = libssh2_sftp_opendir(sftp_session, sftppath);
+    sftp_handle = libssh2_sftp_opendir(sftp_session, rootPath.toLocal8Bit().data());
 
     if(!sftp_handle) {
         fprintf(stderr, "Unable to open dir with SFTP\n");
