@@ -32,7 +32,7 @@ class fileSystem
 {
 public:
     fileSystem();
-    void createFile(QString fileName, bool isDir, quint32 fileAttr);
+    void createFile(QString fileName, bool isDir, quint32 fileAttr, quint64 filesize);
     QVector<fileNodePtr> listFolder(QString path);
     fileNodePtr find(QString fileName);
 private:

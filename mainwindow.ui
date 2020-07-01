@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SSHFS</string>
+   <string>SSHFS(测试，仅支持部分文件操作)</string>
   </property>
   <property name="styleSheet">
    <string notr="true">font: 9pt &quot;微软雅黑&quot;;</string>

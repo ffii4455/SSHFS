@@ -47,6 +47,7 @@ class sshThread : public QThread
     Q_OBJECT
 public:
     sshThread(QObject *parent = 0);
+    ~sshThread();
     void setSshPara(QString hostaddr, int port, QString username, QString password, QString rootPath);
 
 protected:
@@ -56,8 +57,12 @@ private:
     unsigned long hostaddr, port;
     QString username, password, rootPath;
 
-private slots:
+    LIBSSH2_SFTP *sftp_session;
+
+private:
    // void initSession
+    void openDir(QString path);
+    void initSSH();
 
 };
 

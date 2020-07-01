@@ -7,10 +7,10 @@ fileSystem::fileSystem() : root(new fileNode)
     fileIndexTable.insert("\\", root);
 }
 
-void fileSystem::createFile(QString fileName, bool isDir, quint32 fileAttr)
+void fileSystem::createFile(QString fileName, bool isDir, quint32 fileAttr, quint64 filesize)
 {
     fileNodePtr node(new fileNode);
-
+    node->size = filesize;
     node->isDirectory = isDir;
     node->file_attr = fileAttr;
     fileIndexTable[fileName] = node;

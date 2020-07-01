@@ -45,7 +45,7 @@ memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
             if (f)
                 return STATUS_OBJECT_NAME_COLLISION;
 
-           fsys.createFile(QString::fromStdWString(filename), true, FILE_ATTRIBUTE_DIRECTORY);
+           fsys.createFile(QString::fromStdWString(filename), true, FILE_ATTRIBUTE_DIRECTORY, 0);
            return STATUS_SUCCESS;
         }
 
@@ -59,13 +59,13 @@ memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
     {
         case CREATE_ALWAYS:
         {
-            fsys.createFile(QString::fromStdWString(filename), false, file_attributes_and_flags);
+            fsys.createFile(QString::fromStdWString(filename), false, file_attributes_and_flags, 0);
             break;
         }
         case CREATE_NEW:
         {
             if (f) return STATUS_OBJECT_NAME_COLLISION;
-            fsys.createFile(QString::fromStdWString(filename), false, file_attributes_and_flags);
+            fsys.createFile(QString::fromStdWString(filename), false, file_attributes_and_flags, 0);
             break;
         }
 
