@@ -7,6 +7,7 @@
 #include <QHash>
 #include <memory>
 #include <QMutex>
+#include <QObject>
 
 struct filetimes
 {
@@ -24,20 +25,26 @@ struct fileNode
     filetimes times;
     QVector<std::shared_ptr<fileNode>> children;
     void setFileName(QString name);
+
+    fileNode() = default;
 };
 
 typedef std::shared_ptr<fileNode> fileNodePtr;
 
-class fileSystem
+class FileSystem : public QObject
 {
+    Q_OBJECT
 public:
-    fileSystem();
+    FileSystem();
     void createFile(QString fileName, bool isDir, quint32 fileAttr, quint64 filesize);
     QVector<fileNodePtr> listFolder(QString path);
     fileNodePtr find(QString fileName);
 private:
     fileNodePtr root;
     QHash<QString, fileNodePtr> fileIndexTable;
+
+signals:
+    void openDir(QString path);
 };
 
 #endif // FILESYSTEM_H

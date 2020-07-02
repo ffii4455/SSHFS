@@ -1,36 +1,131 @@
 ﻿#include "sshthread.h"
 #include <QDebug>
 #include "fsOperations.h"
+#include <QtConcurrent>
 
-sshThread::sshThread(QObject *parent) : QThread(parent)
+SshThread::SshThread(QObject *parent) : QObject(parent)
 {
 
 }
 
-sshThread::~sshThread()
+SshThread::~SshThread()
 {
     if (sftp_session) libssh2_sftp_shutdown(sftp_session);
+
+#ifdef WIN32
+    closesocket(sock);
+#else
+    close(sock);
+#endif
 }
 
-void sshThread::setSshPara(QString hostaddr, int port, QString username, QString password, QString rootPath)
+void SshThread::start()
+{
+    QtConcurrent::run(this, &SshThread::initSSH);
+}
+
+void SshThread::setSshPara(QString hostaddr, int port, QString username, QString password, QString rootPath)
 {
     this->hostaddr = inet_addr(hostaddr.toLocal8Bit().data());
     this->port = port;
     this->username = username;
     this->password = password;
     this->rootPath = rootPath;
+
+    this->rootPath.replace("\\", "/");
+    if (this->rootPath.endsWith("/")) this->rootPath.chop(1);
 }
 
-void sshThread::run()
+void SshThread::_openDir(QString path)
 {
-    int rc, sock = -1, i, auth_pw = 0;
-    struct sockaddr_in sin;
+    locker.lock();
+    qDebug() << "SSH open dir" << path;
+    LIBSSH2_SFTP_HANDLE *sftp_handle;
+    int rc;
+    if (sftp_session == NULL)
+    {
+        qDebug() << "sftp handle or session is invalid!!";
+        return;
+    }
+
+    sftp_handle = libssh2_sftp_opendir(sftp_session, path.toLocal8Bit().data());
+
+    if(!sftp_handle) {
+        qDebug() << "Unable to open dir with SFTP" << sftp_handle;
+        return;
+    }
+    qDebug() << "libssh2_sftp_opendir() is done, now receive listing!\n" << path;
+    do {
+        char mem[512];
+        char longentry[512];
+        LIBSSH2_SFTP_ATTRIBUTES attrs;
+
+        /* loop until we fail */
+        rc = libssh2_sftp_readdir_ex(sftp_handle, mem, sizeof(mem),
+                                     longentry, sizeof(longentry), &attrs);
+        if(rc > 0) {
+            /* rc is the length of the file name in the mem
+                   buffer */
+
+            //qDebug() << QString::fromLocal8Bit(mem) << attrs.permissions << attrs.filesize << attrs.atime << attrs.mtime;
+            if ((attrs.permissions >> 12) == 0x4)
+            {
+                fsys.createFile(QString("%1%2").arg("\\").arg(mem), true, FILE_ATTRIBUTE_DIRECTORY, attrs.filesize);
+            }
+            else
+            {
+                fsys.createFile(QString("%1%2").arg("\\").arg(mem), false, 0, attrs.filesize);
+            }
+
+
+            if(longentry[0] != '\0') {
+               // printf("##%s##\n", longentry);
+            }
+            else {
+                if(attrs.flags & LIBSSH2_SFTP_ATTR_PERMISSIONS) {
+                    /* this should check what permissions it
+                           is and print the output accordingly */
+                    printf("--fix----- ");
+                }
+                else {
+                    printf("---------- ");
+                }
+
+                if(attrs.flags & LIBSSH2_SFTP_ATTR_UIDGID) {
+                    printf("%4d %4d ", (int) attrs.uid, (int) attrs.gid);
+                }
+                else {
+                    printf("   -    - ");
+                }
+
+                if(attrs.flags & LIBSSH2_SFTP_ATTR_SIZE) {
+                    printf("%8" __FILESIZE " ", attrs.filesize);
+                }
+
+              //  printf("%s\n", mem);
+            }
+        }
+        else
+            break;
+
+    } while(1);
+
+    libssh2_sftp_closedir(sftp_handle);
+    locker.unlock();
+}
+
+void SshThread::openDir(QString path)
+{
+    QtConcurrent::run(this, &SshThread::_openDir, rootPath + path.replace("\\", "/"));
+}
+
+void SshThread::initSSH()
+{
+    qDebug() << "ssh start init";
+    int rc, i, auth_pw = 0;
     const char *fingerprint;
     char *userauthlist;
-    LIBSSH2_SESSION *session;
 
-#ifdef WIN32
-    WSADATA wsadata;
     int err;
 
     err = WSAStartup(MAKEWORD(2, 0), &wsadata);
@@ -38,7 +133,6 @@ void sshThread::run()
         fprintf(stderr, "WSAStartup failed with error: %d\n", err);
         return;
     }
-#endif
 
     rc = libssh2_init(0);
     if(rc != 0) {
@@ -116,10 +210,12 @@ void sshThread::run()
         goto shutdown;
     }
 
+    qDebug() << "ssh start init success";
+
     /* Since we have not set non-blocking, tell libssh2 we are blocking */
     libssh2_session_set_blocking(session, 1);
 
-    openDir(rootPath);
+   // openDir(rootPath);
 
     fprintf(stderr, "libssh2_sftp_opendir()!\n");
     /* Request a dir listing via SFTP */
@@ -128,96 +224,11 @@ void sshThread::run()
 
 shutdown:
 
-    libssh2_session_disconnect(session, "Normal Shutdown");
-    libssh2_session_free(session);
+    //libssh2_session_disconnect(session, "Normal Shutdown");
+    //libssh2_session_free(session);
 
-#ifdef WIN32
-    closesocket(sock);
-#else
-    close(sock);
-#endif
+
     fprintf(stderr, "all done\n");
 
-    libssh2_exit();
-
-}
-
-void sshThread::openDir(QString path)
-{
-    LIBSSH2_SFTP_HANDLE *sftp_handle;
-    int rc;
-    if (sftp_session == NULL)
-    {
-        qDebug() << "sftp handle or session is invalid!!";
-        return;
-    }
-
-    sftp_handle = libssh2_sftp_opendir(sftp_session, path.toLocal8Bit().data());
-
-    if(!sftp_handle) {
-        fprintf(stderr, "Unable to open dir with SFTP\n");
-        return;
-    }
-    fprintf(stderr, "libssh2_sftp_opendir() is done, now receive listing!\n");
-    do {
-        char mem[512];
-        char longentry[512];
-        LIBSSH2_SFTP_ATTRIBUTES attrs;
-
-        /* loop until we fail */
-        rc = libssh2_sftp_readdir_ex(sftp_handle, mem, sizeof(mem),
-                                     longentry, sizeof(longentry), &attrs);
-        if(rc > 0) {
-            /* rc is the length of the file name in the mem
-                   buffer */
-
-            qDebug() << QString::fromLocal8Bit(mem) << attrs.permissions << attrs.filesize << attrs.atime << attrs.mtime;
-            if ((attrs.permissions >> 12) == 0x4)
-            {
-                fsys.createFile(QString("%1%2").arg("\\").arg(mem), true, FILE_ATTRIBUTE_DIRECTORY, attrs.filesize);
-            }
-            else
-            {
-                fsys.createFile(QString("%1%2").arg("\\").arg(mem), false, 0, attrs.filesize);
-            }
-
-
-            if(longentry[0] != '\0') {
-               // printf("##%s##\n", longentry);
-            }
-            else {
-                if(attrs.flags & LIBSSH2_SFTP_ATTR_PERMISSIONS) {
-                    /* this should check what permissions it
-                           is and print the output accordingly */
-                    printf("--fix----- ");
-                }
-                else {
-                    printf("---------- ");
-                }
-
-                if(attrs.flags & LIBSSH2_SFTP_ATTR_UIDGID) {
-                    printf("%4d %4d ", (int) attrs.uid, (int) attrs.gid);
-                }
-                else {
-                    printf("   -    - ");
-                }
-
-                if(attrs.flags & LIBSSH2_SFTP_ATTR_SIZE) {
-                    printf("%8" __FILESIZE " ", attrs.filesize);
-                }
-
-                printf("%s\n", mem);
-            }
-        }
-        else
-            break;
-
-    } while(1);
-
-    libssh2_sftp_closedir(sftp_handle);
-}
-
-void sshThread::initSSH()
-{
-
+  //  libssh2_exit();
 }

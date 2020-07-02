@@ -7,14 +7,17 @@
 #include "fsOperations.h"
 
 
-class fsThread : public QThread
+class FsThread : public QThread
 {
 public:
-    fsThread(QObject *parent = 0);
-    ~fsThread();
+    FsThread(QObject *parent = 0);
+    ~FsThread();
 
 protected:
     virtual void run();
+
+private:
+
 };
 
 #endif // FSTHREAD_H

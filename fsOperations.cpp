@@ -3,7 +3,7 @@
 
 
 
-fileSystem fsys;
+FileSystem fsys;
 
 static NTSTATUS DOKAN_CALLBACK
 memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
@@ -20,7 +20,12 @@ memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
                 &generic_desiredaccess, &file_attributes_and_flags,
                 &creation_disposition);
 
-    qDebug() << "CreateFile" << QString::fromStdWString(filename);
+   // qDebug() << "CreateFile" << QString::fromStdWString(filename) << QString::number(desiredaccess).toInt(nullptr, 10);
+    if (desiredaccess & FILE_LIST_DIRECTORY)
+    {
+        qDebug() << "CreateFile list dir " << QString::fromStdWString(filename) << desiredaccess;
+    }
+
 
     auto filename_str = std::wstring(filename);
     auto f = fsys.find(QString::fromStdWString(filename_str));

@@ -1,11 +1,11 @@
 ﻿#include "fsthread.h"
 
-fsThread::fsThread(QObject *parent) : QThread(parent)
+FsThread::FsThread(QObject *parent) : QThread(parent)
 {
 
 }
 
-fsThread::~fsThread()
+FsThread::~FsThread()
 {
     DokanRemoveMountPoint(L"m:");
     exit();
@@ -13,7 +13,7 @@ fsThread::~fsThread()
 
 }
 
-void fsThread::run()
+void FsThread::run()
 {
     DOKAN_OPTIONS dokan_options;
     ZeroMemory(&dokan_options, sizeof(DOKAN_OPTIONS));

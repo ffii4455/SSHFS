@@ -25,7 +25,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    std::unique_ptr<fsThread> fs;
-    std::unique_ptr<sshThread> ss;
+    std::shared_ptr<FsThread> fs;
+    std::shared_ptr<SshThread> ss;
 };
 #endif // MAINWINDOW_H

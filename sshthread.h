@@ -41,28 +41,35 @@
 #endif
 
 #include <QThread>
+#include <QMutex>
 
-class sshThread : public QThread
+class SshThread : public QObject
 {
     Q_OBJECT
 public:
-    sshThread(QObject *parent = 0);
-    ~sshThread();
+    SshThread(QObject *parent = 0);
+    ~SshThread();
+    void start();
     void setSshPara(QString hostaddr, int port, QString username, QString password, QString rootPath);
-
-protected:
-    virtual void run();
 
 private:
     unsigned long hostaddr, port;
     QString username, password, rootPath;
 
-    LIBSSH2_SFTP *sftp_session;
+    LIBSSH2_SFTP *sftp_session = nullptr;
+    LIBSSH2_SESSION *session = nullptr;
+    WSADATA wsadata;
+    struct sockaddr_in sin;
+    int sock = -1;
 
 private:
-   // void initSession
-    void openDir(QString path);
+    // void initSession
     void initSSH();
+    void _openDir(QString path);
+    QMutex locker;
+
+public slots:
+    void openDir(QString path);
 
 };
 

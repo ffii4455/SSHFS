@@ -8,7 +8,7 @@
 
 
 extern DOKAN_OPERATIONS memfs_operations;
-extern fileSystem fsys;
+extern FileSystem fsys;
 
 
 #endif // FSOPERATIONS_H
