@@ -16,7 +16,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startConnect_clicked()
 {
-    fs.reset(new FsThread());
+    fs.reset(new DokanyThread());
     fs->start();
 
     ss.reset(new SshThread());

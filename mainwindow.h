@@ -25,7 +25,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    std::shared_ptr<FsThread> fs;
+    std::shared_ptr<DokanyThread> fs;
     std::shared_ptr<SshThread> ss;
 };
 #endif // MAINWINDOW_H

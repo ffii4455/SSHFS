@@ -23,7 +23,7 @@ memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
    // qDebug() << "CreateFile" << QString::fromStdWString(filename) << QString::number(desiredaccess).toInt(nullptr, 10);
     if (desiredaccess & FILE_LIST_DIRECTORY)
     {
-        qDebug() << "CreateFile list dir " << QString::fromStdWString(filename) << desiredaccess;
+        qDebug() << "CreateFile list dir " << QString::fromStdWString(filename) << desiredaccess << createoptions;
     }
 
 
@@ -31,7 +31,8 @@ memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
     auto f = fsys.find(QString::fromStdWString(filename_str));
 
     if (filename_str == L"\\System Volume Information" ||
-            filename_str == L"\\$RECYCLE.BIN") {
+            filename_str == L"\\$RECYCLE.BIN")
+    {
         return STATUS_NO_SUCH_FILE;
     }
 

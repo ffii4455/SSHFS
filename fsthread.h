@@ -7,16 +7,17 @@
 #include "fsOperations.h"
 
 
-class FsThread : public QThread
+class DokanyThread : public QThread
 {
 public:
-    FsThread(QObject *parent = 0);
-    ~FsThread();
+    DokanyThread(QObject *parent = 0);
+    ~DokanyThread();
 
 protected:
     virtual void run();
 
 private:
+    FileSystem filenodes;
 
 };
 
