@@ -25,13 +25,7 @@
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="0">
-        <widget class="QListWidget" name="listWidget">
-         <item>
-          <property name="text">
-           <string>新主机</string>
-          </property>
-         </item>
-        </widget>
+        <widget class="QListWidget" name="hostList"/>
        </item>
       </layout>
      </widget>
@@ -104,7 +98,7 @@
              <item>
               <widget class="QLineEdit" name="hostAddr">
                <property name="text">
-                <string>172.28.202.128</string>
+                <string/>
                </property>
               </widget>
              </item>
@@ -117,7 +111,7 @@
                 <enum>QAbstractSpinBox::DefaultStepType</enum>
                </property>
                <property name="value">
-                <number>10022</number>
+                <number>22</number>
                </property>
               </widget>
              </item>
@@ -140,21 +134,24 @@
            <item>
             <widget class="QLineEdit" name="username">
              <property name="text">
-              <string>nusp</string>
+              <string/>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QLineEdit" name="password">
              <property name="text">
-              <string>nusp</string>
+              <string/>
+             </property>
+             <property name="echoMode">
+              <enum>QLineEdit::Password</enum>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QLineEdit" name="rootPath">
              <property name="text">
-              <string>/home/nusp</string>
+              <string/>
              </property>
             </widget>
            </item>

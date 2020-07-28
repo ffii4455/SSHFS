@@ -16,6 +16,14 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    struct HostInfo
+    {
+        QString hostAddr;
+        QString userName;
+        QString password;
+        QString rootPath;
+    };
+
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -23,9 +31,17 @@ public:
 private slots:
     void on_startConnect_clicked();
 
+    void on_saveButton_clicked();
+
+    void on_hostList_currentRowChanged(int currentRow);
+
 private:
     Ui::MainWindow *ui;
     std::shared_ptr<DokanyThread> fs;
     std::shared_ptr<SshThread> ss;
+
+    QVector<HostInfo> hostInfoVec;
+    void readSettings();
+    void writeSettings();
 };
 #endif // MAINWINDOW_H
