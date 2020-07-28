@@ -5,6 +5,7 @@
 #include <QThread>
 #include <dokan/dokan.h>
 #include "fsOperations.h"
+#include "sshthread.h"
 
 
 class DokanyThread : public QThread
@@ -17,7 +18,7 @@ protected:
     virtual void run();
 
 private:
-    FileSystem filenodes;
+
 
 };
 

@@ -70,11 +70,11 @@ void SshThread::_openDir(QString path)
             //qDebug() << QString::fromLocal8Bit(mem) << attrs.permissions << attrs.filesize << attrs.atime << attrs.mtime;
             if ((attrs.permissions >> 12) == 0x4)
             {
-                fsys.createFile(QString("%1%2").arg("\\").arg(mem), true, FILE_ATTRIBUTE_DIRECTORY, attrs.filesize);
+                filenodes.createFile(QString("%1%2").arg("\\").arg(mem), true, FILE_ATTRIBUTE_DIRECTORY, attrs.filesize);
             }
             else
             {
-                fsys.createFile(QString("%1%2").arg("\\").arg(mem), false, 0, attrs.filesize);
+                filenodes.createFile(QString("%1%2").arg("\\").arg(mem), false, 0, attrs.filesize);
             }
 
 

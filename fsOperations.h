@@ -5,10 +5,8 @@
 #include <dokan/dokan.h>
 #include "filesystem.h"
 
-
-
 extern DOKAN_OPERATIONS memfs_operations;
-extern FileSystem fsys;
+extern FileSystem filenodes;
 
 
 #endif // FSOPERATIONS_H

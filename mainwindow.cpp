@@ -26,5 +26,5 @@ void MainWindow::on_startConnect_clicked()
                    ui->password->text(),
                    ui->rootPath->text());
     ss->start();
-    connect(&fsys, &FileSystem::openDir, ss.get(), &SshThread::openDir);
+    connect(&filenodes, &FileSystem::openDir, ss.get(), &SshThread::openDir);
 }

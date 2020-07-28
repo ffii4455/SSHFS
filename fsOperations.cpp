@@ -3,7 +3,7 @@
 
 
 
-FileSystem fsys;
+FileSystem filenodes;
 
 static NTSTATUS DOKAN_CALLBACK
 memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
@@ -28,7 +28,7 @@ memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
 
 
     auto filename_str = std::wstring(filename);
-    auto f = fsys.find(QString::fromStdWString(filename_str));
+    auto f = filenodes.find(QString::fromStdWString(filename_str));
 
     if (filename_str == L"\\System Volume Information" ||
             filename_str == L"\\$RECYCLE.BIN")
@@ -51,7 +51,7 @@ memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
             if (f)
                 return STATUS_OBJECT_NAME_COLLISION;
 
-           fsys.createFile(QString::fromStdWString(filename), true, FILE_ATTRIBUTE_DIRECTORY, 0);
+           filenodes.createFile(QString::fromStdWString(filename), true, FILE_ATTRIBUTE_DIRECTORY, 0);
            return STATUS_SUCCESS;
         }
 
@@ -65,13 +65,13 @@ memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
     {
         case CREATE_ALWAYS:
         {
-            fsys.createFile(QString::fromStdWString(filename), false, file_attributes_and_flags, 0);
+            filenodes.createFile(QString::fromStdWString(filename), false, file_attributes_and_flags, 0);
             break;
         }
         case CREATE_NEW:
         {
             if (f) return STATUS_OBJECT_NAME_COLLISION;
-            fsys.createFile(QString::fromStdWString(filename), false, file_attributes_and_flags, 0);
+            filenodes.createFile(QString::fromStdWString(filename), false, file_attributes_and_flags, 0);
             break;
         }
 
@@ -89,7 +89,7 @@ static NTSTATUS DOKAN_CALLBACK memfs_findfiles(LPCWSTR filename,
     WIN32_FIND_DATAW findData;
     ZeroMemory(&findData, sizeof(WIN32_FIND_DATAW));
 
-    for (auto file : fsys.listFolder(QString::fromStdWString(filename)))
+    for (auto file : filenodes.listFolder(QString::fromStdWString(filename)))
     {
         auto name = file->fileName.toStdWString();
         std::copy(name.begin(), name.end(), std::begin(findData.cFileName));
