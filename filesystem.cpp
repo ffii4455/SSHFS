@@ -1,17 +1,16 @@
 ﻿#include "filesystem.h"
+#include <dokanyThread.h>
 #include <QDebug>
 
-FileSystem::FileSystem() : root(new fileNode)
+FileSystem::FileSystem(DokanyThread *dokany) : m_dokany(dokany), root(new fileNode)
 {
-    root->fileName = "\\";
+    root->fileName = "/";
     root->isDirectory = true;
-    fileIndexTable.insert("\\", root);
+    fileIndexTable.insert("/", root);
 }
 
 void FileSystem::createFile(QString fileName, bool isDir, quint32 fileAttr, quint64 filesize)
 {
-  //  qDebug() << Q_FUNC_INFO << fileName;
-
     if (!fileIndexTable.contains(fileName))
     {
         fileNodePtr node(new fileNode);
@@ -19,12 +18,16 @@ void FileSystem::createFile(QString fileName, bool isDir, quint32 fileAttr, quin
         node->isDirectory = isDir;
         node->file_attr = fileAttr;
         fileIndexTable[fileName] = node;
-        int pos = fileName.lastIndexOf("\\");
+        int pos = fileName.lastIndexOf("/");
         QString parentPath = fileName.left(pos + 1);
-        node->setFileName(fileName.remove("\\"));
+        node->setFileName(fileName.remove("/"));
+        qDebug() << Q_FUNC_INFO << fileName << parentPath;
+        if (fileIndexTable.contains(parentPath))
+        {
+            fileNodePtr &parentNode = fileIndexTable[parentPath];
 
-        fileNodePtr &parentNode = fileIndexTable[parentPath];
-        parentNode->children.append(node);
+            parentNode->children.append(node);
+        }
     }
     else
     {
@@ -39,17 +42,13 @@ void FileSystem::createFile(QString fileName, bool isDir, quint32 fileAttr, quin
 
 QVector<fileNodePtr> FileSystem::listFolder(QString path)
 {
-    qDebug() << "listFolder" << path;
-    if (fileIndexTable.contains(path))
-    {
-        emit openDir(path);
-        return fileIndexTable.value(path)->children;
-    }
-    else
-    {
-        emit openDir(path);
-        return QVector<fileNodePtr>();
-    }
+    path = path.replace("\\", "/");
+
+
+    m_dokany->getSshThread()->openDir(path);
+    //qDebug() << Q_FUNC_INFO << path << fileIndexTable.value(path)->children;
+    return fileIndexTable.value(path)->children;
+
 }
 
 fileNodePtr FileSystem::find(QString fileName)

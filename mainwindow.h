@@ -5,7 +5,7 @@
 #include <QMainWindow>
 #include <memory>
 
-#include "fsthread.h"
+#include "dokanyThread.h"
 #include "sshthread.h"
 
 QT_BEGIN_NAMESPACE
@@ -14,15 +14,7 @@ QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
-
-    struct HostInfo
-    {
-        QString hostAddr;
-        QString userName;
-        QString password;
-        QString rootPath;
-    };
+    Q_OBJECT   
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -37,7 +29,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    std::shared_ptr<DokanyThread> fs;
+    std::shared_ptr<DokanyThread> dokanyThread;
     std::shared_ptr<SshThread> ss;
 
     QVector<HostInfo> hostInfoVec;

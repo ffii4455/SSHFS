@@ -1,9 +1,14 @@
 ﻿#include "sshthread.h"
 #include <QDebug>
 #include "fsOperations.h"
+#include "dokanyThread.h"
 #include <QtConcurrent>
 
-SshThread::SshThread(QObject *parent) : QObject(parent)
+#define GET_FILE_NODES (m_dokany->getFilenodes())
+
+SshThread::SshThread(DokanyThread *dokany, QObject *parent) :
+    m_dokany(dokany),
+    QObject(parent)
 {
 
 }
@@ -38,8 +43,8 @@ void SshThread::setSshPara(QString hostaddr, int port, QString username, QString
 
 void SshThread::_openDir(QString path)
 {
-    locker.lock();
-    qDebug() << "SSH open dir" << path;
+    //  locker.lock();
+
     LIBSSH2_SFTP_HANDLE *sftp_handle;
     int rc;
     if (sftp_session == NULL)
@@ -48,13 +53,16 @@ void SshThread::_openDir(QString path)
         return;
     }
 
-    sftp_handle = libssh2_sftp_opendir(sftp_session, path.toLocal8Bit().data());
+    if (!path.endsWith("/")) path.append("/");
+
+    qDebug() << "SSH open dir" << rootPath + path;
+    sftp_handle = libssh2_sftp_opendir(sftp_session, (rootPath + path).toLocal8Bit().data());
 
     if(!sftp_handle) {
         qDebug() << "Unable to open dir with SFTP" << sftp_handle;
         return;
     }
-    qDebug() << "libssh2_sftp_opendir() is done, now receive listing!\n" << path;
+    qDebug() << "libssh2_sftp_opendir() is done, now receive listing!\n";
     do {
         char mem[512];
         char longentry[512];
@@ -70,16 +78,16 @@ void SshThread::_openDir(QString path)
             //qDebug() << QString::fromLocal8Bit(mem) << attrs.permissions << attrs.filesize << attrs.atime << attrs.mtime;
             if ((attrs.permissions >> 12) == 0x4)
             {
-                filenodes.createFile(QString("%1%2").arg("\\").arg(mem), true, FILE_ATTRIBUTE_DIRECTORY, attrs.filesize);
+                GET_FILE_NODES->createFile(QString("%1%2").arg(path).arg(mem), true, FILE_ATTRIBUTE_DIRECTORY, attrs.filesize);
             }
             else
             {
-                filenodes.createFile(QString("%1%2").arg("\\").arg(mem), false, 0, attrs.filesize);
+                GET_FILE_NODES->createFile(QString("%1%2").arg(path).arg(mem), false, 0, attrs.filesize);
             }
 
 
             if(longentry[0] != '\0') {
-               // printf("##%s##\n", longentry);
+                // printf("##%s##\n", longentry);
             }
             else {
                 if(attrs.flags & LIBSSH2_SFTP_ATTR_PERMISSIONS) {
@@ -102,7 +110,7 @@ void SshThread::_openDir(QString path)
                     printf("%8" __FILESIZE " ", attrs.filesize);
                 }
 
-              //  printf("%s\n", mem);
+                //  printf("%s\n", mem);
             }
         }
         else
@@ -111,12 +119,12 @@ void SshThread::_openDir(QString path)
     } while(1);
 
     libssh2_sftp_closedir(sftp_handle);
-    locker.unlock();
+    // locker.unlock();
 }
 
 void SshThread::openDir(QString path)
 {
-    QtConcurrent::run(this, &SshThread::_openDir, rootPath + path.replace("\\", "/"));
+    _openDir(path.replace("\\", "/"));
 }
 
 void SshThread::initSSH()
@@ -215,12 +223,12 @@ void SshThread::initSSH()
     /* Since we have not set non-blocking, tell libssh2 we are blocking */
     libssh2_session_set_blocking(session, 1);
 
-   // openDir(rootPath);
+    // openDir(rootPath);
 
     fprintf(stderr, "libssh2_sftp_opendir()!\n");
     /* Request a dir listing via SFTP */
 
-   // libssh2_sftp_shutdown(sftp_session);
+    // libssh2_sftp_shutdown(sftp_session);
 
 shutdown:
 
@@ -230,5 +238,5 @@ shutdown:
 
     fprintf(stderr, "all done\n");
 
-  //  libssh2_exit();
+    //  libssh2_exit();
 }

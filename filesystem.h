@@ -31,17 +31,20 @@ struct fileNode
 
 typedef std::shared_ptr<fileNode> fileNodePtr;
 
+class DokanyThread;
+
 class FileSystem : public QObject
 {
     Q_OBJECT
 public:
-    FileSystem();
+    FileSystem(DokanyThread* dokany);
     void createFile(QString fileName, bool isDir, quint32 fileAttr, quint64 filesize);
     QVector<fileNodePtr> listFolder(QString path);
     fileNodePtr find(QString fileName);
 private:
     fileNodePtr root;
     QHash<QString, fileNodePtr> fileIndexTable;
+    DokanyThread* m_dokany;
 
 signals:
     void openDir(QString path);

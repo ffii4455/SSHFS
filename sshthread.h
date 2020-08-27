@@ -6,6 +6,7 @@
 #include "libssh2_config.h"
 #include <libssh2.h>
 #include <libssh2_sftp.h>
+#include "filesystem.h"
 
 #ifdef HAVE_WINSOCK2_H
 # include <winsock2.h>
@@ -43,11 +44,13 @@
 #include <QThread>
 #include <QMutex>
 
+class dokanyThread;
+
 class SshThread : public QObject
 {
     Q_OBJECT
 public:
-    SshThread(QObject *parent = 0);
+    SshThread(DokanyThread *dokany, QObject *parent = 0);
     ~SshThread();
     void start();
     void setSshPara(QString hostaddr, int port, QString username, QString password, QString rootPath);
@@ -67,6 +70,8 @@ private:
     void initSSH();
     void _openDir(QString path);
     QMutex locker;
+
+    DokanyThread *m_dokany;
 
 public slots:
     void openDir(QString path);

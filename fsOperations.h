@@ -6,7 +6,9 @@
 #include "filesystem.h"
 
 extern DOKAN_OPERATIONS memfs_operations;
-extern FileSystem filenodes;
+
+#define GET_FS_INSTANCE \
+  reinterpret_cast<FileSystem*>(dokanfileinfo->DokanOptions->GlobalContext)
 
 
 #endif // FSOPERATIONS_H

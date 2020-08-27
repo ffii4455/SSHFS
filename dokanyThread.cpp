@@ -1,8 +1,14 @@
-﻿#include "fsthread.h"
+﻿#include "dokanyThread.h"
 
-DokanyThread::DokanyThread(QObject *parent) : QThread(parent)
+DokanyThread::DokanyThread(const HostInfo &host, QObject *parent) :
+    filenodes(this),
+    sshThread(this),
+    m_hostInfo(host),
+    QThread(parent)
 {
-
+    QStringList addr = m_hostInfo.hostAddr.split(":");
+    sshThread.setSshPara(addr[0], addr[1].toInt(), m_hostInfo.userName, m_hostInfo.password, m_hostInfo.rootPath);
+    sshThread.start();
 }
 
 DokanyThread::~DokanyThread()
@@ -29,11 +35,11 @@ void DokanyThread::run()
 
     dokan_options.ThreadCount = 1;
     dokan_options.Timeout = 30;
-    dokan_options.GlobalContext = 1234;
+    dokan_options.GlobalContext = reinterpret_cast<ULONG64>(&filenodes);
 
     dokan_options.MountPoint = L"m:";
 
-    NTSTATUS status = DokanMain(&dokan_options, &memfs_operations);
+    NTSTATUS status = DokanMain(&dokan_options, &memfs_operations);   
     switch (status)
     {
         case DOKAN_SUCCESS:
@@ -81,3 +87,5 @@ void DokanyThread::run()
 
 
 }
+
+

@@ -18,16 +18,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 INCLUDEPATH += ./include
 
 SOURCES += \
+    dokanyThread.cpp \
     filesystem.cpp\
-    fsthread.cpp \
     main.cpp \
     mainwindow.cpp \
     fsOperations.cpp \
     sshthread.cpp
 
 HEADERS += \
+    dokanyThread.h \
     filesystem.h\
-    fsthread.h \
     mainwindow.h \
     fsOperations.h \
     sshthread.h

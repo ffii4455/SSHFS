@@ -21,17 +21,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startConnect_clicked()
 {
-    fs.reset(new DokanyThread());
-    fs->start();
-
-    ss.reset(new SshThread());
-    ss->setSshPara(ui->hostAddr->text(),
-                   ui->port->value(),
-                   ui->username->text(),
-                   ui->password->text(),
-                   ui->rootPath->text());
-    ss->start();
-    connect(&filenodes, &FileSystem::openDir, ss.get(), &SshThread::openDir);
+    dokanyThread.reset(new DokanyThread(hostInfoVec.at(ui->hostList->currentRow())));
+    dokanyThread->start();
 }
 
 void MainWindow::on_saveButton_clicked()
