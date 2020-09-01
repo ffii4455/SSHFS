@@ -54,6 +54,7 @@ public:
     ~SshThread();
     void start();
     void setSshPara(QString hostaddr, int port, QString username, QString password, QString rootPath);
+    QVector<FileNodePtr> openDir(QString path);
 
 private:
     unsigned long hostaddr, port;
@@ -67,14 +68,13 @@ private:
 
 private:
     // void initSession
-    void initSSH();
-    void _openDir(QString path);
+    void initSSH();    
     QMutex locker;
 
     DokanyThread *m_dokany;
 
 public slots:
-    void openDir(QString path);
+
 
 };
 

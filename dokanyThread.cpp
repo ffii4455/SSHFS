@@ -1,7 +1,7 @@
 ﻿#include "dokanyThread.h"
 
 DokanyThread::DokanyThread(const HostInfo &host, QObject *parent) :
-    filenodes(this),
+    filenodes(this, host.rootPath),
     sshThread(this),
     m_hostInfo(host),
     QThread(parent)

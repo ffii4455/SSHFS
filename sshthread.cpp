@@ -41,90 +41,63 @@ void SshThread::setSshPara(QString hostaddr, int port, QString username, QString
     if (this->rootPath.endsWith("/")) this->rootPath.chop(1);
 }
 
-void SshThread::_openDir(QString path)
+QVector<FileNodePtr> SshThread::openDir(QString path)
 {
-    //  locker.lock();
-
     LIBSSH2_SFTP_HANDLE *sftp_handle;
+    QVector<FileNodePtr> fileVec;
     int rc;
     if (sftp_session == NULL)
     {
         qDebug() << "sftp handle or session is invalid!!";
-        return;
+        return fileVec;
     }
 
     if (!path.endsWith("/")) path.append("/");
 
-    qDebug() << "SSH open dir" << rootPath + path;
-    sftp_handle = libssh2_sftp_opendir(sftp_session, (rootPath + path).toLocal8Bit().data());
+    qDebug() << "SSH open dir" << path;
+    sftp_handle = libssh2_sftp_opendir(sftp_session, path.toLocal8Bit().data());
 
     if(!sftp_handle) {
         qDebug() << "Unable to open dir with SFTP" << sftp_handle;
-        return;
+        return fileVec;
     }
-    qDebug() << "libssh2_sftp_opendir() is done, now receive listing!\n";
+    //qDebug() << "libssh2_sftp_opendir() is done, now receive listing!\n";    
+
     do {
         char mem[512];
         char longentry[512];
         LIBSSH2_SFTP_ATTRIBUTES attrs;
+        FileNodePtr node = std::make_shared<FileNode>();
 
         /* loop until we fail */
         rc = libssh2_sftp_readdir_ex(sftp_handle, mem, sizeof(mem),
                                      longentry, sizeof(longentry), &attrs);
-        if(rc > 0) {
+        if(rc > 0)
+        {
             /* rc is the length of the file name in the mem
                    buffer */
 
             //qDebug() << QString::fromLocal8Bit(mem) << attrs.permissions << attrs.filesize << attrs.atime << attrs.mtime;
+            node->fileName = mem;
+            node->size = attrs.filesize;
             if ((attrs.permissions >> 12) == 0x4)
             {
-                GET_FILE_NODES->createFile(QString("%1%2").arg(path).arg(mem), true, FILE_ATTRIBUTE_DIRECTORY, attrs.filesize);
+                //GET_FILE_NODES->createFile(QString("%1%2").arg(path).arg(mem), true, FILE_ATTRIBUTE_DIRECTORY, attrs.filesize);
+                node->isDirectory = true;
+                node->file_attr = FILE_ATTRIBUTE_DIRECTORY;
             }
-            else
-            {
-                GET_FILE_NODES->createFile(QString("%1%2").arg(path).arg(mem), false, 0, attrs.filesize);
-            }
-
-
-            if(longentry[0] != '\0') {
-                // printf("##%s##\n", longentry);
-            }
-            else {
-                if(attrs.flags & LIBSSH2_SFTP_ATTR_PERMISSIONS) {
-                    /* this should check what permissions it
-                           is and print the output accordingly */
-                    printf("--fix----- ");
-                }
-                else {
-                    printf("---------- ");
-                }
-
-                if(attrs.flags & LIBSSH2_SFTP_ATTR_UIDGID) {
-                    printf("%4d %4d ", (int) attrs.uid, (int) attrs.gid);
-                }
-                else {
-                    printf("   -    - ");
-                }
-
-                if(attrs.flags & LIBSSH2_SFTP_ATTR_SIZE) {
-                    printf("%8" __FILESIZE " ", attrs.filesize);
-                }
-
-                //  printf("%s\n", mem);
-            }
+            fileVec.append(node);
         }
         else
+        {
             break;
+        }
 
     } while(1);
 
     libssh2_sftp_closedir(sftp_handle);
-    // locker.unlock();
-}
 
-void SshThread::openDir(QString path)
-{
-    _openDir(path.replace("\\", "/"));
+    return fileVec;
 }
 
 void SshThread::initSSH()

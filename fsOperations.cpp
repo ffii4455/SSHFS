@@ -17,10 +17,10 @@ memfs_createfile(LPCWSTR filename, PDOKAN_IO_SECURITY_CONTEXT security_context,
                 &creation_disposition);
 
    // qDebug() << "CreateFile" << QString::fromStdWString(filename) << QString::number(desiredaccess).toInt(nullptr, 10);
-    if (desiredaccess & FILE_LIST_DIRECTORY)
-    {
-        qDebug() << "CreateFile list dir " << QString::fromStdWString(filename) << desiredaccess << createoptions;
-    }
+//    if (desiredaccess & FILE_LIST_DIRECTORY)
+//    {
+//        qDebug() << "CreateFile list dir " << QString::fromStdWString(filename) << desiredaccess << createoptions;
+//    }
 
     auto filenodes = GET_FS_INSTANCE;
 
@@ -100,9 +100,20 @@ static NTSTATUS DOKAN_CALLBACK memfs_findfiles(LPCWSTR filename,
     return STATUS_SUCCESS;
 }
 
+static void DOKAN_CALLBACK memfs_cleanup(LPCWSTR filename,
+                                         PDOKAN_FILE_INFO dokanfileinfo)
+{
+
+}
+
+static void DOKAN_CALLBACK memfs_closeFile(LPCWSTR filename,
+                                           PDOKAN_FILE_INFO /*dokanfileinfo*/) {
+
+}
+
 DOKAN_OPERATIONS memfs_operations = {memfs_createfile,
-                                     nullptr,
-                                     nullptr,
+                                     memfs_cleanup,
+                                     memfs_closeFile,
                                      nullptr,
                                      nullptr,
                                      nullptr,

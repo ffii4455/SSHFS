@@ -2,7 +2,8 @@
 #include <dokanyThread.h>
 #include <QDebug>
 
-FileSystem::FileSystem(DokanyThread *dokany) : m_dokany(dokany), root(new fileNode)
+FileSystem::FileSystem(DokanyThread *dokany, QString sshRootPath) : m_dokany(dokany), root(new FileNode),
+    sshRootPath(sshRootPath)
 {
     root->fileName = "/";
     root->isDirectory = true;
@@ -13,7 +14,7 @@ void FileSystem::createFile(QString fileName, bool isDir, quint32 fileAttr, quin
 {
     if (!fileIndexTable.contains(fileName))
     {
-        fileNodePtr node(new fileNode);
+        FileNodePtr node(new FileNode);
         node->size = filesize;
         node->isDirectory = isDir;
         node->file_attr = fileAttr;
@@ -21,17 +22,17 @@ void FileSystem::createFile(QString fileName, bool isDir, quint32 fileAttr, quin
         int pos = fileName.lastIndexOf("/");
         QString parentPath = fileName.left(pos + 1);
         node->setFileName(fileName.remove("/"));
-        qDebug() << Q_FUNC_INFO << fileName << parentPath;
+       // qDebug() << Q_FUNC_INFO << fileName << parentPath;
         if (fileIndexTable.contains(parentPath))
         {
-            fileNodePtr &parentNode = fileIndexTable[parentPath];
+            FileNodePtr &parentNode = fileIndexTable[parentPath];
 
             parentNode->children.append(node);
         }
     }
     else
     {
-        fileNodePtr node = fileIndexTable[fileName];
+        FileNodePtr node = fileIndexTable[fileName];
         node->size = filesize;
         node->isDirectory = isDir;
         node->file_attr = fileAttr;
@@ -40,18 +41,17 @@ void FileSystem::createFile(QString fileName, bool isDir, quint32 fileAttr, quin
 
 }
 
-QVector<fileNodePtr> FileSystem::listFolder(QString path)
+QVector<FileNodePtr> FileSystem::listFolder(QString path)
 {
     path = path.replace("\\", "/");
 
+    qDebug() << "listFolder " << path;
 
-    m_dokany->getSshThread()->openDir(path);
-    //qDebug() << Q_FUNC_INFO << path << fileIndexTable.value(path)->children;
-    return fileIndexTable.value(path)->children;
 
+    return m_dokany->getSshThread()->openDir(sshRootPath + path);
 }
 
-fileNodePtr FileSystem::find(QString fileName)
+FileNodePtr FileSystem::find(QString fileName)
 {
     if (fileIndexTable.contains(fileName))
     {
@@ -61,9 +61,17 @@ fileNodePtr FileSystem::find(QString fileName)
     return nullptr;
 }
 
-void fileNode::setFileName(QString name)
+void FileNode::setFileName(QString name)
 {
     //  locker.lock();
     fileName = name;
     //  locker.unlock();
 }
+
+FileNode::FileNode(const FileNode &src)
+{
+    fileName = src.fileName;
+    size = src.size;
+}
+
+

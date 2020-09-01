@@ -16,20 +16,23 @@ struct filetimes
   std::atomic<quint64> lastwrite = 0;
 };
 
-struct fileNode
-{    
+struct FileNode
+{
     QString fileName = "";
     bool isDirectory = false;
     quint32 file_attr = 0;
     quint64 size = 0;
     filetimes times;
-    QVector<std::shared_ptr<fileNode>> children;
+    QVector<std::shared_ptr<FileNode>> children;
     void setFileName(QString name);
 
-    fileNode() = default;
+    FileNode() = default;
+    FileNode(const FileNode &src);
+    FileNode(FileNode &&src) = default;
+
 };
 
-typedef std::shared_ptr<fileNode> fileNodePtr;
+typedef std::shared_ptr<FileNode> FileNodePtr;
 
 class DokanyThread;
 
@@ -37,14 +40,15 @@ class FileSystem : public QObject
 {
     Q_OBJECT
 public:
-    FileSystem(DokanyThread* dokany);
+    FileSystem(DokanyThread* dokany, QString sshRootPath);
     void createFile(QString fileName, bool isDir, quint32 fileAttr, quint64 filesize);
-    QVector<fileNodePtr> listFolder(QString path);
-    fileNodePtr find(QString fileName);
+    QVector<FileNodePtr> listFolder(QString path);
+    FileNodePtr find(QString fileName);
 private:
-    fileNodePtr root;
-    QHash<QString, fileNodePtr> fileIndexTable;
+    FileNodePtr root;
+    QHash<QString, FileNodePtr> fileIndexTable;
     DokanyThread* m_dokany;
+    QString       sshRootPath;
 
 signals:
     void openDir(QString path);
