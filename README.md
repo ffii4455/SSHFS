@@ -1,0 +1,3 @@
+A virtual file system for show the files on your server by ssh channel.
+Using Qt5, Dokany and LIBSSH.
+Developing...
