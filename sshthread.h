@@ -55,6 +55,7 @@ public:
     void start();
     void setSshPara(QString hostaddr, int port, QString username, QString password, QString rootPath);
     QVector<FileNodePtr> openDir(QString path);
+    int readFile(QString path, QByteArray &buffer, int offset);
 
 private:
     unsigned long hostaddr, port;

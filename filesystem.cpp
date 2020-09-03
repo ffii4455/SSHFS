@@ -61,6 +61,12 @@ FileNodePtr FileSystem::find(QString fileName)
     return nullptr;
 }
 
+int FileSystem::readFile(QString path, QByteArray &buffer, int offset)
+{
+    path = path.replace("\\", "/");
+    return m_dokany->getSshThread()->readFile(sshRootPath + path, buffer, offset);
+}
+
 void FileNode::setFileName(QString name)
 {
     //  locker.lock();

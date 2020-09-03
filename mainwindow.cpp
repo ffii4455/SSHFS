@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    readSettings();
+    readSettings();    
 }
 
 MainWindow::~MainWindow()
@@ -21,8 +21,16 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startConnect_clicked()
 {
-    dokanyThread.reset(new DokanyThread(hostInfoVec.at(ui->hostList->currentRow())));
+    HostInfo info;
+
+    info.hostAddr = ui->hostAddr->text() + ":" + QString::number(ui->port->value());
+    info.password = ui->password->text();
+    info.userName = ui->username->text();
+    info.rootPath = ui->rootPath->text();
+
+    dokanyThread.reset(new DokanyThread(info));
     dokanyThread->start();
+    writeSettings();
 }
 
 void MainWindow::on_saveButton_clicked()
@@ -93,9 +101,25 @@ void MainWindow::on_hostList_currentRowChanged(int currentRow)
 {
     HostInfo info = hostInfoVec.at(currentRow);
     QStringList addr = info.hostAddr.split(":");
+    if (addr.count() != 2) return;
     ui->hostAddr->setText(addr[0]);
     ui->port->setValue(addr[1].toInt());
     ui->username->setText(info.userName);
     ui->password->setText(info.password);
     ui->rootPath->setText(info.rootPath);
+}
+
+void MainWindow::on_actionAdd_triggered()
+{
+
+}
+
+void MainWindow::on_add_clicked()
+{
+    HostInfo info;
+    info.hostAddr = "new";
+
+    hostInfoVec.append(info);
+    ui->hostList->addItem(info.hostAddr);
+    ui->hostList->setCurrentRow(ui->hostList->count() - 1);
 }

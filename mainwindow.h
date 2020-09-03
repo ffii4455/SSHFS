@@ -27,6 +27,10 @@ private slots:
 
     void on_hostList_currentRowChanged(int currentRow);
 
+    void on_actionAdd_triggered();
+
+    void on_add_clicked();
+
 private:
     Ui::MainWindow *ui;
     std::shared_ptr<DokanyThread> dokanyThread;

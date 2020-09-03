@@ -86,6 +86,10 @@ QVector<FileNodePtr> SshThread::openDir(QString path)
                 node->isDirectory = true;
                 node->file_attr = FILE_ATTRIBUTE_DIRECTORY;
             }
+            if (node->fileName.startsWith("."))
+            {
+                node->file_attr |= FILE_ATTRIBUTE_HIDDEN;
+            }
             fileVec.append(node);
         }
         else
@@ -98,6 +102,38 @@ QVector<FileNodePtr> SshThread::openDir(QString path)
     libssh2_sftp_closedir(sftp_handle);
 
     return fileVec;
+}
+
+int SshThread::readFile(QString path, QByteArray &buffer, int offset)
+{
+    LIBSSH2_SFTP_HANDLE *sftp_handle = libssh2_sftp_open(sftp_session, path.toUtf8().data(), LIBSSH2_FXF_READ, 0);
+
+    if(!sftp_handle)
+    {
+        qDebug("ssh open file failed! %s", path.toUtf8().data());
+        return -1;
+    }
+
+    libssh2_sftp_seek64(sftp_handle, offset);
+
+    char mem[1024];
+    int rc = 0;
+
+    Q_FOREVER
+    {
+        rc =  libssh2_sftp_read(sftp_handle, mem, sizeof(mem));
+
+        if (rc > 0)
+        {
+            buffer.append(mem, rc);
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    return 0;
 }
 
 void SshThread::initSSH()
@@ -127,7 +163,7 @@ void SshThread::initSSH()
     sin.sin_port = htons(port);
     sin.sin_addr.s_addr = hostaddr;
     if(::connect(sock, (struct sockaddr*)(&sin),
-                 sizeof(struct sockaddr_in)) != 0) {
+                  sizeof(struct sockaddr_in)) != 0) {
         fprintf(stderr, "failed to connect!\n");
         return;
     }

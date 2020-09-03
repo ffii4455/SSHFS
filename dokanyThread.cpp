@@ -27,7 +27,7 @@ void DokanyThread::run()
     dokan_options.Options = DOKAN_OPTION_ALT_STREAM;
     //dokan_options.MountPoint = mount_point;
 
-   // dokan_options.Options |= DOKAN_OPTION_STDERR | DOKAN_OPTION_DEBUG;
+  //  dokan_options.Options |= DOKAN_OPTION_STDERR | DOKAN_OPTION_DEBUG;
 
     // Mount type
 
